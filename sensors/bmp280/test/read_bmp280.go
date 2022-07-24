@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/kidoman/embd"
+
 	"github.com/westphae/goflying/sensors"
 	"github.com/westphae/goflying/sensors/bmp280"
 )

@@ -7,7 +7,8 @@ import (
 	"testing"
 
 	"github.com/kidoman/embd"
-	"github.com/westphae/goflying/bmp280"
+
+	"github.com/westphae/goflying/sensors/bmp280"
 )
 
 func TestBMP280Math(t *testing.T) {
@@ -73,7 +74,7 @@ func TestBMP280Setup(t *testing.T) {
 	var (
 		modes = []byte{
 			bmp280.SleepMode,
-			//bmp280.ForcedMode,
+			// bmp280.ForcedMode,
 			bmp280.NormalMode,
 		}
 		standbyTimes = []byte{

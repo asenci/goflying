@@ -3,7 +3,7 @@ package magkal
 import (
 	"math"
 
-	"../ahrs"
+	"github.com/westphae/goflying/ahrs"
 )
 
 const (
@@ -14,14 +14,12 @@ const (
 	AvgMagField = 4390
 )
 
-
 type MagKalState struct {
-	T float64 // Time when state last updated
-	K [3]float64 // Scaling factor for magnetometer
-	L [3]float64 // Offset for magnetometer
+	T      float64                // Time when state last updated
+	K      [3]float64             // Scaling factor for magnetometer
+	L      [3]float64             // Offset for magnetometer
 	LogMap map[string]interface{} // Map only for analysis/debugging
 }
-
 
 // NewMagKal returns a new MagKal object that runs the algorithm passed to it.
 // It is initialized with the starting K, L.
@@ -36,7 +34,6 @@ func NewMagKal(k, l [3]float64, f func(MagKalState, chan ahrs.Measurement, chan 
 	return
 }
 
-
 func (s *MagKalState) updateLogMap(m *ahrs.Measurement, p map[string]interface{}) {
 	var logMapFunc = map[string]func(s *MagKalState, m *ahrs.Measurement) float64{
 		"Ta": func(s *MagKalState, m *ahrs.Measurement) float64 { return s.T },
@@ -46,29 +43,29 @@ func (s *MagKalState) updateLogMap(m *ahrs.Measurement, p map[string]interface{}
 			}
 			return 0
 		},
-		"T":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.T },
-		"TW": func(s *MagKalState, m *ahrs.Measurement) float64 { return m.TW },
-		"W1": func(s *MagKalState, m *ahrs.Measurement) float64 { return m.W1 },
-		"W2": func(s *MagKalState, m *ahrs.Measurement) float64 { return m.W2 },
-		"W3": func(s *MagKalState, m *ahrs.Measurement) float64 { return m.W3 },
-		"A1": func(s *MagKalState, m *ahrs.Measurement) float64 { return m.A1 },
-		"A2": func(s *MagKalState, m *ahrs.Measurement) float64 { return m.A2 },
-		"A3": func(s *MagKalState, m *ahrs.Measurement) float64 { return m.A3 },
-		"B1": func(s *MagKalState, m *ahrs.Measurement) float64 { return m.B1 },
-		"B2": func(s *MagKalState, m *ahrs.Measurement) float64 { return m.B2 },
-		"B3": func(s *MagKalState, m *ahrs.Measurement) float64 { return m.B3 },
-		"M1": func(s *MagKalState, m *ahrs.Measurement) float64 { return m.M1 },
-		"M2": func(s *MagKalState, m *ahrs.Measurement) float64 { return m.M2 },
-		"M3": func(s *MagKalState, m *ahrs.Measurement) float64 { return m.M3 },
-		"K1": func(s *MagKalState, m *ahrs.Measurement) float64 { return s.K[0] },
-		"K2": func(s *MagKalState, m *ahrs.Measurement) float64 { return s.K[1] },
-		"K3": func(s *MagKalState, m *ahrs.Measurement) float64 { return s.K[2] },
-		"L1": func(s *MagKalState, m *ahrs.Measurement) float64 { return s.L[0] },
-		"L2": func(s *MagKalState, m *ahrs.Measurement) float64 { return s.L[1] },
-		"L3": func(s *MagKalState, m *ahrs.Measurement) float64 { return s.L[2] },
-		"MM1":   func(s *MagKalState, m *ahrs.Measurement) float64 { return s.K[0]*m.M1 + s.L[0] },
-		"MM2":   func(s *MagKalState, m *ahrs.Measurement) float64 { return s.K[1]*m.M2 + s.L[1] },
-		"MM3":   func(s *MagKalState, m *ahrs.Measurement) float64 { return s.K[2]*m.M3 + s.L[2] },
+		"T":   func(s *MagKalState, m *ahrs.Measurement) float64 { return m.T },
+		"TW":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.TW },
+		"W1":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.W1 },
+		"W2":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.W2 },
+		"W3":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.W3 },
+		"A1":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.A1 },
+		"A2":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.A2 },
+		"A3":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.A3 },
+		"B1":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.B1 },
+		"B2":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.B2 },
+		"B3":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.B3 },
+		"M1":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.M1 },
+		"M2":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.M2 },
+		"M3":  func(s *MagKalState, m *ahrs.Measurement) float64 { return m.M3 },
+		"K1":  func(s *MagKalState, m *ahrs.Measurement) float64 { return s.K[0] },
+		"K2":  func(s *MagKalState, m *ahrs.Measurement) float64 { return s.K[1] },
+		"K3":  func(s *MagKalState, m *ahrs.Measurement) float64 { return s.K[2] },
+		"L1":  func(s *MagKalState, m *ahrs.Measurement) float64 { return s.L[0] },
+		"L2":  func(s *MagKalState, m *ahrs.Measurement) float64 { return s.L[1] },
+		"L3":  func(s *MagKalState, m *ahrs.Measurement) float64 { return s.L[2] },
+		"MM1": func(s *MagKalState, m *ahrs.Measurement) float64 { return s.K[0]*m.M1 + s.L[0] },
+		"MM2": func(s *MagKalState, m *ahrs.Measurement) float64 { return s.K[1]*m.M2 + s.L[1] },
+		"MM3": func(s *MagKalState, m *ahrs.Measurement) float64 { return s.K[2]*m.M3 + s.L[2] },
 	}
 
 	for k := range logMapFunc {

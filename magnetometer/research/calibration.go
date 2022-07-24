@@ -18,10 +18,12 @@ import (
 	"sync"
 	"time"
 
-	".."
-	"../../ahrs"
-	"../../mpu9250"
 	"github.com/gorilla/websocket"
+
+	magkal "github.com/westphae/goflying/magnetometer"
+	"github.com/westphae/goflying/sensors/mpu9250"
+
+	"github.com/westphae/goflying/ahrs"
 )
 
 const (
@@ -183,9 +185,9 @@ func readMPUData(data <-chan *mpu9250.MPUData, freq time.Duration) (reqData chan
 
 	go func() {
 		var (
-			ch     chan map[string]interface{}
-			cur    *mpu9250.MPUData
-			n      magkal.MagKalState
+			ch  chan map[string]interface{}
+			cur *mpu9250.MPUData
+			n   magkal.MagKalState
 		)
 
 		t0 := time.Now()
