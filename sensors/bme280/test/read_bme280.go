@@ -48,7 +48,7 @@ func main() {
 	for {
 		t := <-clock.C
 		for _, bme := range bmes {
-			fmt.Printf("%s,0x%02X,%.2f,%.2f,%.2f,%.1f\n", t.Format(time.StampMilli), bme.I2CAddress(), bme.Data.Temperature(), bme.Data.Pressure(), bme.Data.Humidity(), bme.Altitude())
+			fmt.Printf("%s,%s,%.2f,%.2f,%.2f,%.1f\n", t.Format(time.StampMilli), bme.I2CAddress(), bme.Data.Temperature(), bme.Data.Pressure(), bme.Data.Humidity(), bme.Altitude())
 		}
 	}
 }

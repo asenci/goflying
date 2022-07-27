@@ -1,5 +1,10 @@
 package bme280
 
+import (
+	"fmt"
+	"strconv"
+)
+
 const (
 	ChipID    = 0x60
 	ResetCode = 0xB6
@@ -52,6 +57,14 @@ func (b ConfigByte) SetInactiveDuration(value InactiveDuration) ConfigByte {
 	return ConfigByte(setValue(byte(b), InactiveDurationSize, InactiveDurationShift, byte(value)))
 }
 
+func (b ConfigByte) String() string {
+	return fmt.Sprintf(
+		"inactive duration: %s, filter coefficient: %s",
+		b.InactiveDuration(),
+		b.FilterCoefficient(),
+	)
+}
+
 type ControlByte byte
 
 func (b ControlByte) PressureOversampling() PressureOversampling {
@@ -78,7 +91,24 @@ func (b ControlByte) SetTemperatureOversampling(value TemperatureOversampling) C
 	return ControlByte(setValue(byte(b), TemperatureOversamplingSize, TemperatureOversamplingShift, byte(value)))
 }
 
+func (b ControlByte) String() string {
+	return fmt.Sprintf(
+		"temperature oversampling: %s, pressure oversampling: %s, mode: %s",
+		b.TemperatureOversampling(),
+		b.PressureOversampling(),
+		b.RunMode(),
+	)
+}
+
 type FilterCoefficient byte
+
+func (b FilterCoefficient) String() string {
+	if b > 0 {
+		return strconv.Itoa(1 << b)
+	}
+
+	return "off"
+}
 
 func (b FilterCoefficient) Value() int {
 	if b > 0 {
@@ -109,7 +139,18 @@ func (b HumidityControlByte) SetHumidityOversampling(value HumidityOversampling)
 	return HumidityControlByte(setValue(byte(b), HumidityOversamplingSize, HumidityOversamplingShift, byte(value)))
 }
 
+func (b HumidityControlByte) String() string {
+	return fmt.Sprintf(
+		"humidity oversampling: %s",
+		b.HumidityOversampling(),
+	)
+}
+
 type HumidityOversampling byte
+
+func (b HumidityOversampling) String() string {
+	return oversamplingString(oversamplingValue(byte(b)))
+}
 
 func (b HumidityOversampling) Value() int {
 	return oversamplingValue(byte(b))
@@ -128,6 +169,10 @@ const (
 )
 
 type I2CAddress byte
+
+func (b I2CAddress) String() string {
+	return fmt.Sprintf("0x%02X", byte(b))
+}
 
 const (
 	I2CAddressLow  I2CAddress = 0x76
@@ -159,6 +204,10 @@ func (d InactiveDuration) Milliseconds() float64 {
 	}
 }
 
+func (d InactiveDuration) String() string {
+	return fmt.Sprintf("%.2fms", d.Milliseconds())
+}
+
 const (
 	InactiveDurationShift = 5
 	InactiveDurationSize  = 3
@@ -174,6 +223,10 @@ const (
 )
 
 type PressureOversampling byte
+
+func (b PressureOversampling) String() string {
+	return oversamplingString(oversamplingValue(byte(b)))
+}
 
 func (b PressureOversampling) Value() int {
 	return oversamplingValue(byte(b))
@@ -202,7 +255,24 @@ const (
 	RunModeNormal RunMode = 0x03
 )
 
+func (b RunMode) String() string {
+	switch b {
+	case RunModeSleep:
+		return "sleep"
+	case RunModeForced:
+		return "forced"
+	case RunModeNormal:
+		return "normal"
+	default:
+		return fmt.Sprintf("unknown run mode: %02X", byte(b))
+	}
+}
+
 type TemperatureOversampling byte
+
+func (b TemperatureOversampling) String() string {
+	return oversamplingString(oversamplingValue(byte(b)))
+}
 
 func (b TemperatureOversampling) Value() int {
 	return oversamplingValue(byte(b))
@@ -233,6 +303,10 @@ func setValue(b byte, size, shift int, value byte) byte {
 	clearMask := ^getMask
 
 	return (b & clearMask) | ((value & valueMask) << shift)
+}
+
+func oversamplingString(n int) string {
+	return fmt.Sprintf("x%d", n)
 }
 
 func oversamplingValue(b byte) int {
