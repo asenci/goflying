@@ -13,15 +13,10 @@ import (
 
 	"github.com/kidoman/embd"
 	_ "github.com/kidoman/embd/host/all"
-	_ "github.com/kidoman/embd/host/rpi"
-
-	"github.com/westphae/goflying/sensors"
 )
 
 const (
-	QNH            = 1013.25          // Sea level reference pressure in hPa
-	BufSize        = 256              // Buffer size for reading data from BME
-	ExtraReadDelay = time.Millisecond // Delay between chip reading polls
+	QNH = 1013.25 // Sea level reference pressure in hPa
 )
 
 type BME280 struct {
@@ -30,8 +25,6 @@ type BME280 struct {
 
 	Data *MeasurementData
 
-	C      <-chan *sensors.BMEData
-	CBuf   <-chan *sensors.BMEData
 	cClose chan bool
 }
 
@@ -431,3 +424,5 @@ func (bme *BME280) TemperatureOversampling() (TemperatureOversampling, error) {
 
 	return controlByte.TemperatureOversampling(), nil
 }
+
+type SettingFunc func(configByte ConfigByte, controlByte ControlByte, humControlByte HumidityControlByte) (ConfigByte, ControlByte, HumidityControlByte, error)
