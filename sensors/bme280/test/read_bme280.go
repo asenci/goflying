@@ -21,14 +21,11 @@ func main() {
 
 	for i, address := range []bme280.I2CAddress{bme280.I2CAddressLow, bme280.I2CAddressHigh} {
 		bme, err := bme280.NewBME280(i2cbus, address, func(configByte bme280.ConfigByte, controlByte bme280.ControlByte, humControlByte bme280.HumidityControlByte) (bme280.ConfigByte, bme280.ControlByte, bme280.HumidityControlByte, error) {
-			configByte.SetFilterCoefficient(bme280.FilterCoefficient16)
-			configByte.SetInactiveDuration(bme280.InactiveDuration62_5ms)
+			configByte = configByte.SetFilterCoefficient(bme280.FilterCoefficient16).SetInactiveDuration(bme280.InactiveDuration62_5ms)
 
-			controlByte.SetRunMode(bme280.RunModeNormal)
-			controlByte.SetPressureOversampling(bme280.PressureOversampling1x)
-			controlByte.SetTemperatureOversampling(bme280.TemperatureOversampling1x)
+			controlByte = controlByte.SetRunMode(bme280.RunModeNormal).SetPressureOversampling(bme280.PressureOversampling1x).SetTemperatureOversampling(bme280.TemperatureOversampling1x)
 
-			humControlByte.SetHumidityOversampling(bme280.HumidityOversampling1x)
+			humControlByte = humControlByte.SetHumidityOversampling(bme280.HumidityOversampling1x)
 
 			return configByte, controlByte, humControlByte, nil
 		})
