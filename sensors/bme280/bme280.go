@@ -305,8 +305,8 @@ func (bme *BME280) SetConfiguration(settings ...SettingFunc) error {
 		}
 	}
 
-	if newConfigByte != configByte {
-		if err := bme.SetConfigByte(newConfigByte); err != nil {
+	if newHumControlByte != humControlByte {
+		if err := bme.SetHumidityControlByte(newHumControlByte); err != nil {
 			return err
 		}
 	}
@@ -317,8 +317,8 @@ func (bme *BME280) SetConfiguration(settings ...SettingFunc) error {
 		}
 	}
 
-	if newHumControlByte != humControlByte {
-		if err := bme.SetHumidityControlByte(newHumControlByte); err != nil {
+	if newConfigByte != configByte {
+		if err := bme.SetConfigByte(newConfigByte); err != nil {
 			return err
 		}
 	}
