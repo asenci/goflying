@@ -111,7 +111,7 @@ func (cal *CalibrationData) CompensateTemperature(rawTemp int32) int32 {
 	var1 = (var1 * int32(cal.digT2())) >> 11
 
 	var2 := (rawTemp >> 4) - int32(cal.digT1())
-	var2 = (((var2 * var2) >> 12) * int32(cal.digH3())) >> 14
+	var2 = (((var2 * var2) >> 12) * int32(cal.digT3())) >> 14
 
 	cal.tFine = var1 + var2
 

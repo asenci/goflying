@@ -17,8 +17,8 @@ func TestCalibrationData_CompensateHumidity(t *testing.T) {
 		rawHum  int32
 		want    uint32
 	}{
-		{"initial data", cal, 524288, 32768, 92947},
-		{"case 01", cal, 526634, 32768, 93031},
+		{"initial data", cal, 524288, 32768, 92937},
+		{"case 01", cal, 526634, 26701, 56732},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -45,8 +45,8 @@ func TestCalibrationData_CompensatePressure(t *testing.T) {
 		rawPress int32
 		want     uint32
 	}{
-		{"initial data", cal, 524288, 524288, 6965154},
-		{"case 01", cal, 526634, 338837, 10064647},
+		{"initial data", cal, 524288, 524288, 6965184},
+		{"case 01", cal, 526634, 338837, 10064693},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
