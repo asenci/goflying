@@ -20,7 +20,7 @@ func TestMeasurementData_Calibrated(t *testing.T) {
 		Temperature float64
 	}{
 		{"initial data", []byte{0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0x80, 0x00}, cal, 90.768555, 696.515400, 22.360000},
-		{"case 01", []byte{0x52, 0xB9, 0x50, 0x80, 0x92, 0xA0, 0x80, 0x00}, cal, 90.850586, 1006.464700, 23.110000},
+		{"case 01", []byte{0x52, 0xB9, 0x50, 0x80, 0x92, 0xA0, 0x68, 0x4D}, cal, 55.407227, 1006.464700, 23.110000},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -54,7 +54,7 @@ func TestMeasurementData_Raw(t *testing.T) {
 		rawTemperature uint32
 	}{
 		{"initial data", []byte{0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0x80, 0x00}, 32768, 524288, 524288},
-		{"case 01", []byte{0x52, 0xB9, 0x50, 0x80, 0x92, 0xA0, 0x80, 0x00}, 32768, 338837, 526634},
+		{"case 01", []byte{0x52, 0xB9, 0x50, 0x80, 0x92, 0xA0, 0x68, 0x4D}, 26701, 338837, 526634},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
