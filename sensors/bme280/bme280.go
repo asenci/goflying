@@ -8,15 +8,10 @@ package bme280
 import (
 	"fmt"
 	"log"
-	"math"
 	"time"
 
 	"github.com/kidoman/embd"
 	_ "github.com/kidoman/embd/host/all"
-)
-
-const (
-	QNH = 1013.25 // Sea level reference pressure in hPa
 )
 
 type BME280 struct {
@@ -25,6 +20,7 @@ type BME280 struct {
 
 	Data *MeasurementData
 
+	// TODO: use Context to handle start/stop
 	cClose chan bool
 }
 
@@ -107,10 +103,6 @@ func (bme *BME280) Run() error {
 			break
 		}
 	}
-}
-
-func (bme *BME280) Altitude() float64 {
-	return 145366.45 * (1.0 - math.Pow(bme.Data.Pressure()/QNH, 0.190284))
 }
 
 func (bme *BME280) ChipID() (byte, error) {
