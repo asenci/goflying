@@ -1,7 +1,6 @@
 package bme280
 
 import (
-	"math"
 	"testing"
 )
 
@@ -19,8 +18,8 @@ func TestMeasurementData_Calibrated(t *testing.T) {
 		Pressure    float64
 		Temperature float64
 	}{
-		{"initial data", []byte{0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0x80, 0x00}, cal, 90.768555, 696.515400, 22.360000},
-		{"case 01", []byte{0x52, 0xB9, 0x50, 0x80, 0x92, 0xA0, 0x68, 0x4D}, cal, 55.407227, 1006.464700, 23.110000},
+		{"initial data", []byte{0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0x80, 0x00}, cal, 90.7587890625, 696.5183999999999, 22.36},
+		{"case 01", []byte{0x52, 0xB9, 0x50, 0x80, 0x92, 0xA0, 0x68, 0x4D}, cal, 55.40234375, 1006.4693, 23.11},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -29,16 +28,16 @@ func TestMeasurementData_Calibrated(t *testing.T) {
 			d.Update(tt.data)
 
 			// Get temperature first to update tFine
-			if got := d.Temperature(); math.Round(got) != math.Round(tt.Temperature) {
-				t.Errorf("Temperature() = %f, want %f", got, tt.Temperature)
+			if got := d.Temperature(); (got) != (tt.Temperature) {
+				t.Errorf("Temperature() = %g, want %g", got, tt.Temperature)
 			}
 
-			if got := d.Humidity(); math.Round(got) != math.Round(tt.Humidity) {
-				t.Errorf("Humidity() = %f, want %f", got, tt.Humidity)
+			if got := d.Humidity(); (got) != (tt.Humidity) {
+				t.Errorf("Humidity() = %g, want %g", got, tt.Humidity)
 			}
 
-			if got := d.Pressure(); math.Round(got) != math.Round(tt.Pressure) {
-				t.Errorf("Pressure() = %f, want %f", got, tt.Pressure)
+			if got := d.Pressure(); (got) != (tt.Pressure) {
+				t.Errorf("Pressure() = %g, want %g", got, tt.Pressure)
 			}
 
 		})
