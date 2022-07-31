@@ -7,6 +7,7 @@ import (
 
 	"github.com/kidoman/embd"
 
+	"github.com/westphae/goflying"
 	"github.com/westphae/goflying/sensors/bme280"
 )
 
@@ -14,7 +15,7 @@ func main() {
 	ctx, stop := context.WithCancel(context.Background())
 	defer stop()
 
-	i2cbus := embd.NewI2CBus(1)
+	i2cbus := &goflying.I2CBus{I2CBus: embd.NewI2CBus(1)}
 
 	var bmes []*bme280.Sensor
 
