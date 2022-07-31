@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -10,45 +11,62 @@ import (
 )
 
 func main() {
+	ctx, stop := context.WithCancel(context.Background())
+	defer stop()
+
 	i2cbus := embd.NewI2CBus(1)
 
-	var bmes []*bme280.BME280
+	var bmes []*bme280.Sensor
+
+	var stopFuncs []func()
 	defer func() {
-		for _, bme := range bmes {
-			bme.Close()
+		for _, f := range stopFuncs {
+			f()
 		}
 	}()
 
-	for i, address := range []bme280.I2CAddress{bme280.I2CAddressLow, bme280.I2CAddressHigh} {
-		bme, err := bme280.NewBME280(i2cbus, address, func(configByte bme280.ConfigByte, controlByte bme280.ControlByte, humControlByte bme280.HumidityControlByte) (bme280.ConfigByte, bme280.ControlByte, bme280.HumidityControlByte, error) {
-			configByte = configByte.SetFilterCoefficient(bme280.FilterCoefficient16).SetInactiveDuration(bme280.InactiveDuration62_5ms)
-
-			controlByte = controlByte.SetRunMode(bme280.RunModeNormal).SetPressureOversampling(bme280.PressureOversampling1x).SetTemperatureOversampling(bme280.TemperatureOversampling1x)
-
-			humControlByte = humControlByte.SetHumidityOversampling(bme280.HumidityOversampling1x)
-
-			return configByte, controlByte, humControlByte, nil
-		})
+	for _, address := range []bme280.I2CAddress{bme280.I2CAddressLow, bme280.I2CAddressHigh} {
+		bme, err := bme280.NewSensor(i2cbus, address,
+			bme280.WithFilterCoefficient(bme280.FilterCoefficient16),
+			bme280.WithInactiveDuration(bme280.InactiveDuration62_5ms),
+			bme280.WithPressureOversampling(bme280.PressureOversampling1x),
+			bme280.WithTemperatureOversampling(bme280.TemperatureOversampling1x),
+			bme280.WithHumidityOversampling(bme280.HumidityOversampling1x),
+		)
 
 		if err != nil {
-			fmt.Printf("no BME280 at address %d: %s\n", i, err)
+			fmt.Printf("no sensor at address %s: %s\n", address, err)
 			continue
 		}
 
 		bmes = append(bmes, bme)
+
+		stopFunc, err := bme.Start(ctx)
+		if err != nil {
+			fmt.Printf("error starting sensor polling: %s", err)
+			continue
+		}
+
+		stopFuncs = append(stopFuncs, stopFunc)
 	}
 
 	if len(bmes) == 0 {
 		return
 	}
 
-	fmt.Println("t,chip,temp,press,hum,alt")
 	delay, _ := bmes[0].MeasurementDuration(true)
 	clock := time.NewTicker(delay)
+	defer clock.Stop()
+
+	fmt.Println("t,chip,temp,press,hum,alt")
 	for {
-		t := <-clock.C
-		for _, bme := range bmes {
-			fmt.Printf("%s,%s,%.2f,%.2f,%.2f,%.1f\n", t.Format(time.StampMilli), bme.I2CAddress(), bme.Data.Temperature(), bme.Data.Pressure(), bme.Data.Humidity(), bme.Altitude())
+		select {
+		case t := <-clock.C:
+			for _, bme := range bmes {
+				fmt.Printf("%s,%s,%s,%s,%s\n", t.Format(time.StampMilli), bme.I2CAddress(), bme.Data.Temperature(), bme.Data.Pressure(), bme.Data.Humidity())
+			}
+		case <-ctx.Done():
+			break
 		}
 	}
 }

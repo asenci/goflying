@@ -124,7 +124,7 @@ func TestNewCalibrationData(t *testing.T) {
 			cal := NewCalibrationData(tt.calibrationData, tt.humidityCalibrationData)
 
 			if got := cal.digH1(); got != tt.want.digH1 {
-				t.Errorf("digH1() = %02X, want %02X", got, tt.want.digH1)
+				t.Errorf("digH1() = 0x%02X, want 0x%02X", got, tt.want.digH1)
 			}
 
 			if got := cal.digH2(); got != tt.want.digH2 {
@@ -132,7 +132,7 @@ func TestNewCalibrationData(t *testing.T) {
 			}
 
 			if got := cal.digH3(); got != tt.want.digH3 {
-				t.Errorf("digH3() = %02X, want %02X", got, tt.want.digH3)
+				t.Errorf("digH3() = 0x%02X, want 0x%02X", got, tt.want.digH3)
 			}
 
 			if got := cal.digH4(); got != tt.want.digH4 {
@@ -144,7 +144,7 @@ func TestNewCalibrationData(t *testing.T) {
 			}
 
 			if got := cal.digH6(); got != tt.want.digH6 {
-				t.Errorf("digH6() = %02X, want %02X", got, tt.want.digH6)
+				t.Errorf("digH6() = 0x%02X, want 0x%02X", got, tt.want.digH6)
 			}
 
 			if got := cal.digP1(); got != tt.want.digP1 {

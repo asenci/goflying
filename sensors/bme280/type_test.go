@@ -2,10 +2,10 @@ package bme280
 
 import "testing"
 
-func TestConfigByte_FilterCoefficient(t *testing.T) {
+func TestConfig_FilterCoefficient(t *testing.T) {
 	tests := []struct {
 		name string
-		b    ConfigByte
+		b    Config
 		want FilterCoefficient
 	}{
 		{"filter coefficient off", 0x00, FilterCoefficientOff},
@@ -17,16 +17,16 @@ func TestConfigByte_FilterCoefficient(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.b.FilterCoefficient(); got != tt.want {
-				t.Errorf("FilterCoefficient() = %02X, want %02X", got, tt.want)
+				t.Errorf("FilterCoefficient() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestConfigByte_InactiveDuration(t *testing.T) {
+func TestConfig_InactiveDuration(t *testing.T) {
 	tests := []struct {
 		name string
-		b    ConfigByte
+		b    Config
 		want InactiveDuration
 	}{
 		{"inactive duration 0.5ms", 0x00, InactiveDuration0_5ms},
@@ -41,18 +41,18 @@ func TestConfigByte_InactiveDuration(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.b.InactiveDuration(); got != tt.want {
-				t.Errorf("InactiveDuration() = %02X, want %02X", got, tt.want)
+				t.Errorf("InactiveDuration() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestConfigByte_SetFilterCoefficient(t *testing.T) {
+func TestConfig_SetFilterCoefficient(t *testing.T) {
 	tests := []struct {
 		name string
-		b    ConfigByte
+		b    Config
 		new  FilterCoefficient
-		want ConfigByte
+		want Config
 	}{
 		{"set filter coefficient to off", 0xFF, FilterCoefficientOff, 0xE3},
 		{"set filter coefficient to 2", 0xFF, FilterCoefficient2, 0xE7},
@@ -63,18 +63,18 @@ func TestConfigByte_SetFilterCoefficient(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.b.SetFilterCoefficient(tt.new); got != tt.want {
-				t.Errorf("SetFilterCoefficient() = %02X, want %02X", got, tt.want)
+				t.Errorf("SetFilterCoefficient() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestConfigByte_SetInactiveDuration(t *testing.T) {
+func TestConfig_SetInactiveDuration(t *testing.T) {
 	tests := []struct {
 		name string
-		b    ConfigByte
+		b    Config
 		new  InactiveDuration
-		want ConfigByte
+		want Config
 	}{
 		{"set inactive duration to 0.5ms", 0xFF, InactiveDuration0_5ms, 0x1F},
 		{"set inactive duration to 62.5ms", 0xFF, InactiveDuration62_5ms, 0x3F},
@@ -88,16 +88,16 @@ func TestConfigByte_SetInactiveDuration(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.b.SetInactiveDuration(tt.new); got != tt.want {
-				t.Errorf("SetInactiveDuration() = %02X, want %02X", got, tt.want)
+				t.Errorf("SetInactiveDuration() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestControlByte_PressureOversampling(t *testing.T) {
+func TestCtrlMeas_PressureOversampling(t *testing.T) {
 	tests := []struct {
 		name string
-		b    ControlByte
+		b    CtrlMeas
 		want PressureOversampling
 	}{
 		{"skip pressure oversampling", 0x00, PressureOversamplingSkipped},
@@ -110,37 +110,37 @@ func TestControlByte_PressureOversampling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.b.PressureOversampling(); got != tt.want {
-				t.Errorf("PressureOversampling() = %02X, want %02X", got, tt.want)
+				t.Errorf("PressureOversampling() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestControlByte_RunMode(t *testing.T) {
+func TestCtrlMeas_Mode(t *testing.T) {
 	tests := []struct {
 		name string
-		b    ControlByte
-		want RunMode
+		b    CtrlMeas
+		want Mode
 	}{
-		{"sleep mode", 0x00, RunModeSleep},
-		{"forced mode", 0x01, RunModeForced},
-		{"normal mode", 0x03, RunModeNormal},
+		{"sleep mode", 0x00, ModeSleep},
+		{"forced mode", 0x01, ModeForced},
+		{"normal mode", 0x03, ModeNormal},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.b.RunMode(); got != tt.want {
-				t.Errorf("RunMode() = %02X, want %02X", got, tt.want)
+			if got := tt.b.Mode(); got != tt.want {
+				t.Errorf("Mode() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestControlByte_SetPressureOversampling(t *testing.T) {
+func TestCtrlMeas_SetPressureOversampling(t *testing.T) {
 	tests := []struct {
 		name string
-		b    ControlByte
+		b    CtrlMeas
 		new  PressureOversampling
-		want ControlByte
+		want CtrlMeas
 	}{
 		{"set pressure oversampling to skipped", 0xFF, PressureOversamplingSkipped, 0xE3},
 		{"set pressure oversampling to 1x", 0xFF, PressureOversampling1x, 0xE7},
@@ -152,38 +152,38 @@ func TestControlByte_SetPressureOversampling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.b.SetPressureOversampling(tt.new); got != tt.want {
-				t.Errorf("SetPressureOversampling() = %02X, want %02X", got, tt.want)
+				t.Errorf("SetPressureOversampling() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestControlByte_SetRunMode(t *testing.T) {
+func TestCtrlMeas_SetMode(t *testing.T) {
 	tests := []struct {
 		name string
-		b    ControlByte
-		new  RunMode
-		want ControlByte
+		b    CtrlMeas
+		new  Mode
+		want CtrlMeas
 	}{
-		{"set to sleep mode", 0xFF, RunModeSleep, 0xFC},
-		{"set to forced mode", 0xFF, RunModeForced, 0xFD},
-		{"set to normal mode", 0xFC, RunModeNormal, 0xFF},
+		{"set to sleep mode", 0xFF, ModeSleep, 0xFC},
+		{"set to forced mode", 0xFF, ModeForced, 0xFD},
+		{"set to normal mode", 0xFC, ModeNormal, 0xFF},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.b.SetRunMode(tt.new); got != tt.want {
-				t.Errorf("SetRunMode() = %02X, want %02X", got, tt.want)
+			if got := tt.b.SetMode(tt.new); got != tt.want {
+				t.Errorf("SetMode() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestControlByte_SetTemperatureOversampling(t *testing.T) {
+func TestCtrlMeas_SetTemperatureOversampling(t *testing.T) {
 	tests := []struct {
 		name string
-		b    ControlByte
+		b    CtrlMeas
 		new  TemperatureOversampling
-		want ControlByte
+		want CtrlMeas
 	}{
 		{"set temperature oversampling to skipped", 0xFF, TemperatureOversamplingSkipped, 0x1F},
 		{"set temperature oversampling to 1x", 0xFF, TemperatureOversampling1x, 0x3F},
@@ -195,16 +195,16 @@ func TestControlByte_SetTemperatureOversampling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.b.SetTemperatureOversampling(tt.new); got != tt.want {
-				t.Errorf("SetTemperatureOversampling() = %02X, want %02X", got, tt.want)
+				t.Errorf("SetTemperatureOversampling() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestControlByte_TemperatureOversampling(t *testing.T) {
+func TestCtrlMeas_TemperatureOversampling(t *testing.T) {
 	tests := []struct {
 		name string
-		b    ControlByte
+		b    CtrlMeas
 		want TemperatureOversampling
 	}{
 		{"skip temperature oversampling", 0x00, TemperatureOversamplingSkipped},
@@ -217,7 +217,7 @@ func TestControlByte_TemperatureOversampling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.b.TemperatureOversampling(); got != tt.want {
-				t.Errorf("TemperatureOversampling() = %02X, want %02X", got, tt.want)
+				t.Errorf("TemperatureOversampling() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}
@@ -244,10 +244,10 @@ func TestFilterCoefficient_Value(t *testing.T) {
 	}
 }
 
-func TestHumidityControlByte_HumidityOversampling(t *testing.T) {
+func TestCtrlHum_HumidityOversampling(t *testing.T) {
 	tests := []struct {
 		name string
-		b    HumidityControlByte
+		b    CtrlHum
 		want HumidityOversampling
 	}{
 		{"skip humidity oversampling", 0x00, HumidityOversamplingSkipped},
@@ -260,18 +260,18 @@ func TestHumidityControlByte_HumidityOversampling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.b.HumidityOversampling(); got != tt.want {
-				t.Errorf("HumidityOversampling() = %02X, want %02X", got, tt.want)
+				t.Errorf("HumidityOversampling() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestHumidityControlByte_SetHumidityOversampling(t *testing.T) {
+func TestCtrlHum_SetHumidityOversampling(t *testing.T) {
 	tests := []struct {
 		name string
-		b    HumidityControlByte
+		b    CtrlHum
 		new  HumidityOversampling
-		want HumidityControlByte
+		want CtrlHum
 	}{
 		{"set humidity oversampling to skipped", 0xFF, HumidityOversamplingSkipped, 0xF8},
 		{"set humidity oversampling to 1x", 0xFF, HumidityOversampling1x, 0xF9},
@@ -283,7 +283,7 @@ func TestHumidityControlByte_SetHumidityOversampling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.b.SetHumidityOversampling(tt.new); got != tt.want {
-				t.Errorf("SetHumidityOversampling() = %02X, want %02X", got, tt.want)
+				t.Errorf("SetHumidityOversampling() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}
@@ -427,7 +427,7 @@ func Test_getValue(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := getValue(tt.b, tt.size, tt.shift); got != tt.want {
-				t.Errorf("getValue() = %02X, want %02X", got, tt.want)
+				t.Errorf("getValue() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}
@@ -505,7 +505,7 @@ func Test_setValue(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := setValue(0x00, tt.size, tt.shift, tt.value); got != tt.want {
-				t.Errorf("setValue() = %02X, want %02X", got, tt.want)
+				t.Errorf("setValue() = 0x%02X, want 0x%02X", got, tt.want)
 			}
 		})
 	}

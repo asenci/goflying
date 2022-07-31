@@ -2,9 +2,14 @@ package bme280
 
 import (
 	"encoding/binary"
+	"fmt"
 	"sync"
 )
 
+// CalibrationData represents the factory calibration bits on the BME280 chip.
+// It is used for performing value compensation on the raw measurement values.
+// CompensateTemperature must be run before CompensateHumidity and
+// CompensatePressure so the t_fine value is updated.
 type CalibrationData struct {
 	rawCalibrationData         []byte
 	rawHumidityCalibrationData []byte
@@ -13,8 +18,10 @@ type CalibrationData struct {
 	tFineMux sync.RWMutex
 }
 
-// Compensate humidity measurements using calibration data
-// Black magic imported from the datasheet
+// CompensateHumidity compensates the humidity measurements using the factory
+// calibration data. Black-box algorithm imported from the datasheet. Humidity
+// is given in 1024 * % relative humidity. i.e.: 79974.4 represents 78.1%
+// relative humidity.
 func (cal *CalibrationData) CompensateHumidity(rawHum int32) uint32 {
 	cal.tFineMux.RLock()
 	defer cal.tFineMux.RUnlock()
@@ -56,8 +63,9 @@ func (cal *CalibrationData) CompensateHumidity(rawHum int32) uint32 {
 	return uint32(humidity)
 }
 
-// Compensate pressure measurements using calibration data
-// Black magic imported from the datasheet
+// CompensatePressure compensates the pressure measurements using the factory
+// calibration data. Black-box algorithm imported from the datasheet. Pressure
+// is given in 100 * Pascal. i.e.: 10132500.00 represents 1013.25hPa.
 func (cal *CalibrationData) CompensatePressure(rawPress int32) uint32 {
 	cal.tFineMux.RLock()
 	defer cal.tFineMux.RUnlock()
@@ -101,8 +109,9 @@ func (cal *CalibrationData) CompensatePressure(rawPress int32) uint32 {
 	return uint32(pressure)
 }
 
-// Compensate temperature measurements using calibration data
-// Black magic imported from the datasheet
+// CompensateTemperature compensates the temperature measurements using the
+// factory calibration data. Black-box algorithm imported from the datasheet.
+// Temperature is given in 100 * ºCelsius. i.e.: 1500.00 represents 15.0ºC.
 func (cal *CalibrationData) CompensateTemperature(rawTemp int32) int32 {
 	cal.tFineMux.Lock()
 	defer cal.tFineMux.Unlock()
@@ -198,6 +207,15 @@ func (cal *CalibrationData) digT2() int16 {
 
 func (cal *CalibrationData) digT3() int16 {
 	return int16(binary.LittleEndian.Uint16(cal.rawCalibrationData[4:6]))
+}
+
+func (cal *CalibrationData) String() string {
+	return fmt.Sprintf(
+		"dig_H1: 0x%02X, dig_H2: %d, dig_H3: 0x%02X, dig_H4: %d, dig_H5: %d, dig_H6: 0x%02X, dig_P1: %d, dig_P2: %d, dig_P3: %d, dig_P4: %d, dig_P5: %d, dig_P6: %d, dig_P7: %d, dig_P8: %d, dig_P9: %d, dig_T1: %d, dig_T2: %d, dig_T3: %d",
+		cal.digH1(), cal.digH2(), cal.digH3(), cal.digH4(), cal.digH5(), cal.digH6(),
+		cal.digP1(), cal.digP2(), cal.digP3(), cal.digP4(), cal.digP5(), cal.digP6(), cal.digP7(), cal.digP8(), cal.digP9(),
+		cal.digT1(), cal.digT2(), cal.digT3(),
+	)
 }
 
 func NewCalibrationData(calibrationData, humidityCalibrationData []byte) *CalibrationData {

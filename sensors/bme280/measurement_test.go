@@ -2,6 +2,8 @@ package bme280
 
 import (
 	"testing"
+
+	"github.com/westphae/goflying"
 )
 
 func TestMeasurementData_Calibrated(t *testing.T) {
@@ -14,10 +16,12 @@ func TestMeasurementData_Calibrated(t *testing.T) {
 		name        string
 		data        []byte
 		cal         *CalibrationData
-		Humidity    float64
-		Pressure    float64
-		Temperature float64
+		Humidity    goflying.RelativeHumidity
+		Pressure    goflying.HPa
+		Temperature goflying.Celsius
 	}{
+		{"all zeroes", []byte{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0}, cal, goflying.RelativeHumidity(formatHumidityRH(MeasurementHumMin)), goflying.HPa(formatPressureHPa(MeasurementPressMax)), goflying.Celsius(formatTemperatureC(MeasurementTempMin))},
+		{"all ones", []byte{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}, cal, goflying.RelativeHumidity(formatHumidityRH(MeasurementHumMax)), goflying.HPa(formatPressureHPa(MeasurementPressMin)), goflying.Celsius(formatTemperatureC(MeasurementTempMax))},
 		{"initial data", []byte{0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0x80, 0x00}, cal, 90.7587890625, 696.5183999999999, 22.36},
 		{"case 01", []byte{0x52, 0xB9, 0x50, 0x80, 0x92, 0xA0, 0x68, 0x4D}, cal, 55.40234375, 1006.4693, 23.11},
 	}
@@ -48,10 +52,12 @@ func TestMeasurementData_Raw(t *testing.T) {
 	tests := []struct {
 		name           string
 		data           []byte
-		rawHumidity    uint32
-		rawPressure    uint32
-		rawTemperature uint32
+		rawHumidity    int32
+		rawPressure    int32
+		rawTemperature int32
 	}{
+		{"all zeroes", []byte{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0}, 0, 0, 0},
+		{"all ones", []byte{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}, 65535, 1048575, 1048575},
 		{"initial data", []byte{0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0x80, 0x00}, 32768, 524288, 524288},
 		{"case 01", []byte{0x52, 0xB9, 0x50, 0x80, 0x92, 0xA0, 0x68, 0x4D}, 26701, 338837, 526634},
 	}

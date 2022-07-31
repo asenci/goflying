@@ -1,7 +1,17 @@
 package bme280
 
-import "sync"
+import (
+	"fmt"
+	"sync"
 
+	"github.com/westphae/goflying"
+)
+
+// MeasurementData represents the measurement values read from the chip
+// measurement registers. It uses the factory calibration data to compensate the
+// raw measurement data and return formatted values. Temperature must be read
+// first so the t_fine compensation value can be calculated for Humidity and
+// Pressure compensation.
 type MeasurementData struct {
 	mux sync.RWMutex
 
@@ -19,52 +29,49 @@ type MeasurementData struct {
 	rawTemperatureDataXLSB byte
 }
 
-func (d *MeasurementData) Humidity() float64 {
-	humidity := d.calibrationData.CompensateHumidity(int32(d.rawHumidity()))
-
-	// Humidity is given in 1024 * % relative humidity
-	return float64(humidity) / 1024
+// Humidity returns the relative humidity in % as a float
+func (d *MeasurementData) Humidity() goflying.RelativeHumidity {
+	return formatHumidityRH(d.calibrationData.CompensateHumidity(d.rawHumidity()))
 }
 
-func (d *MeasurementData) Pressure() float64 {
-	pressure := d.calibrationData.CompensatePressure(int32(d.rawPressure()))
-
-	// Pressure is given in 100 * Pascal
-	return float64(pressure) / 100 / 100
+// Pressure returns the air pressure in hPa (same as millibars) as a float
+func (d *MeasurementData) Pressure() goflying.HPa {
+	return formatPressureHPa(d.calibrationData.CompensatePressure(d.rawPressure()))
 }
 
-func (d *MeasurementData) rawHumidity() uint32 {
+func (d *MeasurementData) rawHumidity() int32 {
 	d.mux.RLock()
 	defer d.mux.RUnlock()
 
-	return (uint32(d.rawHumidityDataMSB) << 8) | uint32(d.rawHumidityDataLSB)
+	return (int32(d.rawHumidityDataMSB) << 8) | int32(d.rawHumidityDataLSB)
 }
 
-func (d *MeasurementData) rawPressure() uint32 {
+func (d *MeasurementData) rawPressure() int32 {
 	d.mux.RLock()
 	defer d.mux.RUnlock()
 
-	return (uint32(d.rawPressureDataMSB) << 12) | (uint32(d.rawPressureDataLSB) << 4) | (uint32(d.rawPressureDataXLSB) >> 4)
+	return (int32(d.rawPressureDataMSB) << 12) | (int32(d.rawPressureDataLSB) << 4) | (int32(d.rawPressureDataXLSB) >> 4)
 }
 
-func (d *MeasurementData) rawTemperature() uint32 {
+func (d *MeasurementData) rawTemperature() int32 {
 	d.mux.RLock()
 	defer d.mux.RUnlock()
 
-	return (uint32(d.rawTemperatureDataMSB) << 12) | (uint32(d.rawTemperatureDataLSB) << 4) | (uint32(d.rawTemperatureDataXLSB) >> 4)
+	return (int32(d.rawTemperatureDataMSB) << 12) | (int32(d.rawTemperatureDataLSB) << 4) | (int32(d.rawTemperatureDataXLSB) >> 4)
 }
 
+// SetCalibrationData stores the factory calibration data for measurement
+// compensation
 func (d *MeasurementData) SetCalibrationData(cal *CalibrationData) {
 	d.calibrationData = cal
 }
 
-func (d *MeasurementData) Temperature() float64 {
-	temperature := d.calibrationData.CompensateTemperature(int32(d.rawTemperature()))
-
-	// Pressure is given in 100 * ºCelsius
-	return float64(temperature) / 100
+// Temperature returns the ambient temperature in ºC as a float
+func (d *MeasurementData) Temperature() goflying.Celsius {
+	return formatTemperatureC(d.calibrationData.CompensateTemperature(d.rawTemperature()))
 }
 
+// Update sets the raw measurement data as read from the chip measurement registers
 func (d *MeasurementData) Update(data []byte) {
 	d.mux.Lock()
 	defer d.mux.Unlock()
@@ -79,4 +86,32 @@ func (d *MeasurementData) Update(data []byte) {
 
 	d.rawHumidityDataMSB = data[6]
 	d.rawHumidityDataLSB = data[7]
+}
+
+func (d *MeasurementData) String() string {
+	return fmt.Sprintf(
+		"temperature: %.2fºC (raw data: %d), humidity: %.2f%% (raw data: %d), pressure: %.2fhPa (raw data: %d)",
+		d.Temperature(), d.rawTemperature(),
+		d.Humidity(), d.rawHumidity(),
+		d.Pressure(), d.rawPressure(),
+	)
+}
+
+func NewMeasurementData(cal *CalibrationData) *MeasurementData {
+	return &MeasurementData{calibrationData: cal}
+}
+
+// Humidity is given in 1024 * % relative humidity
+func formatHumidityRH(value uint32) goflying.RelativeHumidity {
+	return goflying.RelativeHumidity(float64(value) / 1024)
+}
+
+// Pressure is given in 100 * Pascal
+func formatPressureHPa(value uint32) goflying.HPa {
+	return goflying.HPa(float64(value) / 100 / 100)
+}
+
+// Temperature is given in 100 * ºCelsius
+func formatTemperatureC(value int32) goflying.Celsius {
+	return goflying.Celsius(float64(value) / 100)
 }

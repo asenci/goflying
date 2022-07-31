@@ -5,6 +5,7 @@ import (
 	"strconv"
 )
 
+//goland:noinspection GoCommentStart
 const (
 	ChipID    = 0x60
 	ResetCode = 0xB6
@@ -25,9 +26,9 @@ const (
 	RegisterChipID             = 0xD0
 	RegisterSoftReset          = 0xE0
 	RegisterHumCalibrationData = 0xE1
-	RegisterHumControl         = 0xF2
+	RegisterCtrlHum            = 0xF2
 	RegisterStatus             = 0xF3
-	RegisterControl            = 0xF4
+	RegisterCtrlMeas           = 0xF4
 	RegisterConfig             = 0xF5
 	RegisterPressDataMSB       = 0xF7
 	RegisterPressDataLSB       = 0xF8
@@ -39,25 +40,25 @@ const (
 	RegisterHumDataLSB         = 0xFE
 )
 
-type ConfigByte byte
+type Config byte
 
-func (b ConfigByte) FilterCoefficient() FilterCoefficient {
+func (b Config) FilterCoefficient() FilterCoefficient {
 	return FilterCoefficient(getValue(byte(b), FilterCoefficientOversamplingSize, FilterCoefficientOversamplingShift))
 }
 
-func (b ConfigByte) SetFilterCoefficient(value FilterCoefficient) ConfigByte {
-	return ConfigByte(setValue(byte(b), FilterCoefficientOversamplingSize, FilterCoefficientOversamplingShift, byte(value)))
+func (b Config) SetFilterCoefficient(value FilterCoefficient) Config {
+	return Config(setValue(byte(b), FilterCoefficientOversamplingSize, FilterCoefficientOversamplingShift, byte(value)))
 }
 
-func (b ConfigByte) InactiveDuration() InactiveDuration {
+func (b Config) InactiveDuration() InactiveDuration {
 	return InactiveDuration(getValue(byte(b), InactiveDurationSize, InactiveDurationShift))
 }
 
-func (b ConfigByte) SetInactiveDuration(value InactiveDuration) ConfigByte {
-	return ConfigByte(setValue(byte(b), InactiveDurationSize, InactiveDurationShift, byte(value)))
+func (b Config) SetInactiveDuration(value InactiveDuration) Config {
+	return Config(setValue(byte(b), InactiveDurationSize, InactiveDurationShift, byte(value)))
 }
 
-func (b ConfigByte) String() string {
+func (b Config) String() string {
 	return fmt.Sprintf(
 		"inactive duration: %s, filter coefficient: %s",
 		b.InactiveDuration(),
@@ -65,38 +66,55 @@ func (b ConfigByte) String() string {
 	)
 }
 
-type ControlByte byte
+type CtrlHum byte
 
-func (b ControlByte) PressureOversampling() PressureOversampling {
+func (b CtrlHum) HumidityOversampling() HumidityOversampling {
+	return HumidityOversampling(getValue(byte(b), HumidityOversamplingSize, HumidityOversamplingShift))
+}
+
+func (b CtrlHum) SetHumidityOversampling(value HumidityOversampling) CtrlHum {
+	return CtrlHum(setValue(byte(b), HumidityOversamplingSize, HumidityOversamplingShift, byte(value)))
+}
+
+func (b CtrlHum) String() string {
+	return fmt.Sprintf(
+		"humidity oversampling: %s",
+		b.HumidityOversampling(),
+	)
+}
+
+type CtrlMeas byte
+
+func (b CtrlMeas) Mode() Mode {
+	return Mode(getValue(byte(b), ModeSize, ModeShift))
+}
+
+func (b CtrlMeas) PressureOversampling() PressureOversampling {
 	return PressureOversampling(getValue(byte(b), PressureOversamplingSize, PressureOversamplingShift))
 }
 
-func (b ControlByte) SetPressureOversampling(value PressureOversampling) ControlByte {
-	return ControlByte(setValue(byte(b), PressureOversamplingSize, PressureOversamplingShift, byte(value)))
+func (b CtrlMeas) SetMode(value Mode) CtrlMeas {
+	return CtrlMeas(setValue(byte(b), ModeSize, ModeShift, byte(value)))
 }
 
-func (b ControlByte) RunMode() RunMode {
-	return RunMode(getValue(byte(b), RunModeSize, RunModeShift))
+func (b CtrlMeas) SetPressureOversampling(value PressureOversampling) CtrlMeas {
+	return CtrlMeas(setValue(byte(b), PressureOversamplingSize, PressureOversamplingShift, byte(value)))
 }
 
-func (b ControlByte) SetRunMode(value RunMode) ControlByte {
-	return ControlByte(setValue(byte(b), RunModeSize, RunModeShift, byte(value)))
+func (b CtrlMeas) SetTemperatureOversampling(value TemperatureOversampling) CtrlMeas {
+	return CtrlMeas(setValue(byte(b), TemperatureOversamplingSize, TemperatureOversamplingShift, byte(value)))
 }
 
-func (b ControlByte) TemperatureOversampling() TemperatureOversampling {
+func (b CtrlMeas) TemperatureOversampling() TemperatureOversampling {
 	return TemperatureOversampling(getValue(byte(b), TemperatureOversamplingSize, TemperatureOversamplingShift))
 }
 
-func (b ControlByte) SetTemperatureOversampling(value TemperatureOversampling) ControlByte {
-	return ControlByte(setValue(byte(b), TemperatureOversamplingSize, TemperatureOversamplingShift, byte(value)))
-}
-
-func (b ControlByte) String() string {
+func (b CtrlMeas) String() string {
 	return fmt.Sprintf(
 		"temperature oversampling: %s, pressure oversampling: %s, mode: %s",
 		b.TemperatureOversampling(),
 		b.PressureOversampling(),
-		b.RunMode(),
+		b.Mode(),
 	)
 }
 
@@ -128,23 +146,6 @@ const (
 	FilterCoefficient8   FilterCoefficient = 0x03
 	FilterCoefficient16  FilterCoefficient = 0x04
 )
-
-type HumidityControlByte byte
-
-func (b HumidityControlByte) HumidityOversampling() HumidityOversampling {
-	return HumidityOversampling(getValue(byte(b), HumidityOversamplingSize, HumidityOversamplingShift))
-}
-
-func (b HumidityControlByte) SetHumidityOversampling(value HumidityOversampling) HumidityControlByte {
-	return HumidityControlByte(setValue(byte(b), HumidityOversamplingSize, HumidityOversamplingShift, byte(value)))
-}
-
-func (b HumidityControlByte) String() string {
-	return fmt.Sprintf(
-		"humidity oversampling: %s",
-		b.HumidityOversampling(),
-	)
-}
 
 type HumidityOversampling byte
 
@@ -244,27 +245,27 @@ const (
 	PressureOversampling16x     PressureOversampling = 0x05
 )
 
-type RunMode byte
+type Mode byte
 
 const (
-	RunModeShift = 0
-	RunModeSize  = 2
+	ModeShift = 0
+	ModeSize  = 2
 
-	RunModeSleep  RunMode = 0x00
-	RunModeForced RunMode = 0x01
-	RunModeNormal RunMode = 0x03
+	ModeSleep  Mode = 0x00
+	ModeForced Mode = 0x01
+	ModeNormal Mode = 0x03
 )
 
-func (b RunMode) String() string {
+func (b Mode) String() string {
 	switch b {
-	case RunModeSleep:
+	case ModeSleep:
 		return "sleep"
-	case RunModeForced:
+	case ModeForced:
 		return "forced"
-	case RunModeNormal:
+	case ModeNormal:
 		return "normal"
 	default:
-		return fmt.Sprintf("unknown run mode: %02X", byte(b))
+		return fmt.Sprintf("unknown run mode: 0x%02X", byte(b))
 	}
 }
 
