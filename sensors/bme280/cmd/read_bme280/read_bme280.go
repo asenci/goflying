@@ -59,12 +59,12 @@ func main() {
 	clock := time.NewTicker(delay)
 	defer clock.Stop()
 
-	fmt.Println("t,chip,temp,press,hum,alt")
+	fmt.Println("timestamp, chip address, temperature, pressure, humidity")
 	for {
 		select {
-		case t := <-clock.C:
+		case <-clock.C:
 			for _, bme := range bmes {
-				fmt.Printf("%s,%s,%s,%s,%s\n", t.Format(time.StampMilli), bme.I2CAddress(), bme.Data.Temperature(), bme.Data.Pressure(), bme.Data.Humidity())
+				fmt.Printf("%s, %s, %s, %s, %s\n", bme.Data.Timestamp().Format(time.StampMilli), bme.I2CAddress(), bme.Data.Temperature(), bme.Data.Pressure(), bme.Data.Humidity())
 			}
 		case <-ctx.Done():
 			break

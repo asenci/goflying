@@ -3,6 +3,7 @@ package bme280
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/westphae/goflying"
 )
@@ -27,6 +28,8 @@ type MeasurementData struct {
 	rawTemperatureDataMSB  byte
 	rawTemperatureDataLSB  byte
 	rawTemperatureDataXLSB byte
+
+	timestamp time.Time
 }
 
 // Humidity returns the relative humidity in % as a float
@@ -72,7 +75,7 @@ func (d *MeasurementData) Temperature() goflying.Celsius {
 }
 
 // Update sets the raw measurement data as read from the chip measurement registers
-func (d *MeasurementData) Update(data []byte) {
+func (d *MeasurementData) Update(data []byte, timestamp time.Time) {
 	d.mux.Lock()
 	defer d.mux.Unlock()
 
@@ -86,6 +89,8 @@ func (d *MeasurementData) Update(data []byte) {
 
 	d.rawHumidityDataMSB = data[6]
 	d.rawHumidityDataLSB = data[7]
+
+	d.timestamp = timestamp
 }
 
 func (d *MeasurementData) String() string {
@@ -95,6 +100,13 @@ func (d *MeasurementData) String() string {
 		d.Humidity(), d.rawHumidity(),
 		d.Pressure(), d.rawPressure(),
 	)
+}
+
+func (d *MeasurementData) Timestamp() time.Time {
+	d.mux.RLock()
+	defer d.mux.RUnlock()
+
+	return d.timestamp
 }
 
 func NewMeasurementData(cal *CalibrationData) *MeasurementData {

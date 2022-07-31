@@ -167,7 +167,7 @@ func (bme *Sensor) poll(ctx context.Context, frequency time.Duration) {
 
 	for {
 		select {
-		case <-ticker.C:
+		case timestamp := <-ticker.C:
 			goflying.Debugln("bme280: reading measurement data")
 
 			if err := bme.i2CBus.ReadFromReg(bme.i2CAddress, RegisterPressDataMSB, rawData); err != nil {
@@ -175,7 +175,7 @@ func (bme *Sensor) poll(ctx context.Context, frequency time.Duration) {
 				continue
 			}
 
-			bme.Data.Update(rawData)
+			bme.Data.Update(rawData, timestamp)
 
 			goflying.Debugf("bme280: new measurement data: %s\n", bme.Data)
 
